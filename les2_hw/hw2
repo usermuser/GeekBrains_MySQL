@@ -1,0 +1,19 @@
+ALTER TABLE `GB_schema`.`Country` 
+DROP COLUMN `avg_salary`,
+CHANGE COLUMN `Country` `title` VARCHAR(45) CHARACTER SET 'utf8mb4' COLLATE 'utf8_unicode_ci' NOT NULL ;
+
+# Чтобы создать индекc на колонку age
+#CREATE INDEX age ON users(age);
+CREATE INDEX `title` ON `_countries`
+CREATE INDEX `name_lastname` ON `shtat`(`name`, `lastname`);
+
+ALTER TABLE `GB_schema`.`Region` 
+DROP COLUMN `avg_age`,
+CHANGE COLUMN `country_id` `country_id` INT(11) NOT NULL AFTER `id`,
+CHANGE COLUMN `name` `title` VARCHAR(150) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NOT NULL , RENAME TO  `GB_schema`.`_regions` ;
+
+# меняем таблицу City
+ALTER TABLE `GB_schema`.`City` 
+# удаляем колонку `population`, 
+# переименовываем таблицу в _cities
+DROP COLUMN `population`, RENAME TO  `GB_schema`.`_cities` ;
