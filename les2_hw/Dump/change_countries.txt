@@ -21,5 +21,4 @@ ALTER TABLE `_countries` DROP `avg_salary`;
 # ALTER TABLE table_name
 # CHANGE COLUMN old_name TO new_name;
 ALTER TABLE `_countries` CHANGE Country title VARCHAR(150) NOT NULL;
-ALTER TABLE '_countries' ADD INDEX `country_name` (`title`);
-# ALTER TABLE `depart` ADD INDEX `depname` (`name`);
+ALTER TABLE `_countries` ADD INDEX `country_name` (`title`);

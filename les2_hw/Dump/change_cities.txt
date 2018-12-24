@@ -2,7 +2,7 @@ ALTER TABLE `GB_schema`.`City`
 RENAME TO  `GB_schema`.`_cities` ;
 
 ALTER TABLE `GB_schema`.`_cities` 
-CHANGE COLUMN `name` `title` VARCHAR(45) CHARACTER 
+CHANGE COLUMN `name` `title` VARCHAR(150) CHARACTER 
 SET 'utf8' COLLATE 'utf8_unicode_ci' 
 NOT NULL AFTER `population`;
 
@@ -22,3 +22,9 @@ REFERENCES `_countries`(`id`)
 ON UPDATE CASCADE                    
 ON DELETE RESTRICT;
 
+# добавим столбец important после country_id
+ALTER TABLE `GB_schema`.`_cities`
+ADD COLUMN `important` TINYINT(1) NOT NULL AFTER `country_id`;
+
+# изменим кодировку для всей базы данных
+ALTER DATABASE `GB_schema` DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;

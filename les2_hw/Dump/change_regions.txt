@@ -25,3 +25,7 @@ FOREIGN KEY (`country_id`)           # `country_id` - это название с
 REFERENCES `_countries`(`id`)        # на какой столбец ссылаемся
 ON UPDATE CASCADE                    
 ON DELETE RESTRICT;
+
+#
+ALTER TABLE `GB_schema`.`City` 
+RENAME TO  `GB_schema`.`_cities` ;
