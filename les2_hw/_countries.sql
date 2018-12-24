@@ -7,8 +7,8 @@
 # ALTER TABLE table_name
 # RENAME TO new_table_name;
 
-
-USE `lesson2`;
+# USE `DATABASES`;
+USE `GB_schema`;
 
 # rename to _countries
 ALTER TABLE `Country` 
@@ -20,7 +20,6 @@ ALTER TABLE `_countries` DROP `avg_salary`;
 # rename column _countries.Country to `title`;
 # ALTER TABLE table_name
 # CHANGE COLUMN old_name TO new_name;
-ALTER TABLE `_countries` CHANGE Country title VARCHAR(150) NOT NULL INDEX KEY;
-
-
-
+ALTER TABLE `_countries` CHANGE Country title VARCHAR(150) NOT NULL;
+ALTER TABLE '_countries' ADD INDEX `country_name` (`title`);
+# ALTER TABLE `depart` ADD INDEX `depname` (`name`);
