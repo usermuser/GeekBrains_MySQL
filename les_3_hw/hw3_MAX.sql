@@ -1,4 +1,4 @@
 # База данных «Сотрудники»:
 #Выбрать максимальную зарплату у сотрудника.
 
-SELECT MAX(`zp`) FROM `sotrudniki`.`shtat`;
+SELECT `name`, `zp`, `otdel` FROM `sotrudniki`.`shtat` ORDER BY `zp` DESC LIMIT 1;
