@@ -1,0 +1,164 @@
+﻿SET foreign_key_checks = 0;
+ALTER ... 
+SET foreign_key_checks = 1;
+
+
+CREATE DATABASE IF NOT EXISTS `sotrudniki`;
+
+USE `sotrudniki`;
+
+CREATE TABLE IF NOT EXISTS `depart` (
+`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+`name` VARCHAR(40) NOT NULL,
+`count` INT DEFAULT 0,
+`head_id` INT 
+);
+
+CREATE TABLE IF NOT EXISTS `shtat` (
+`id` INT NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(25) NOT NULL,
+`lastname` VARCHAR(30) NOT NULL,
+`otdel` INT,
+`zp` INT,
+PRIMARY KEY (`id`)
+)DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE `shtat` 
+ADD FOREIGN KEY (`otdel`)
+REFERENCES `depart`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+ALTER TABLE `shtat` 
+ADD FOREIGN KEY (`otdel`)
+REFERENCES `depart`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+INSERT INTO `depart` VALUES (3,'Раклама', 1, 1);
+
+INSERT INTO `depart` 
+(`name`) VALUES 
+('Маркетинг'),
+('Контроль кач-ва'),
+('Охрана');
+
+INSERT INTO `depart` 
+(`name`, `count`) VALUES 
+('Бухгалтерия', 1);
+
+INSERT INTO `shtat` 
+(`name`, `lastname`, `otdel`, `zp`) VALUES 
+('Тарас','Голомозый',1,25000),
+('Андрей','Юрченко',1,20000),
+('Алена','Звягинцева',1,40000),
+('Антон','Полонников',2,27000);
+
+ALTER TABLE `shtat` AUTO_INCREMENT = 100;
+
+INSERT INTO `shtat` 
+(`name`, `lastname`, `otdel`, `zp`) VALUES 
+('Анатолий','Башлыков',1,25000);
+
+SELECT * FROM `shtat`;
+
+SELECT `lastname`, `name`, `zp` FROM `shtat`;
+
+SELECT `zp` + `id` FROM `shtat`;
+
+SELECT `id`, CONCAT(`lastname`, ' ', `name`) AS `ФИО`, `zp` AS `Зарплата` 
+FROM `shtat`;
+
+SELECT DISTINCT `zp` AS `Зарплата` FROM `shtat`;
+
+SELECT `id`, CONCAT(`lastname`, ' ', `name`) AS `ФИО`, `zp` AS `Зарплата`, `otdel` 
+FROM `shtat`
+WHERE `zp` >= 20000 AND `otdel` != 1;
+
+SELECT `id`, CONCAT(`lastname`, ' ', `name`) AS `ФИО`, `zp` AS `Зарплата`, `otdel` 
+FROM `shtat`
+WHERE `zp` >= 20000 OR `otdel` != 1;
+
+SELECT `id`, CONCAT(`lastname`, ' ', `name`) AS `ФИО`, `zp` AS `Зарплата`, `otdel` 
+FROM `shtat`
+WHERE `zp` IN (27000,28000,38000,20000);
+
+SELECT `id`, CONCAT(`lastname`, ' ', `name`) AS `ФИО`, `zp` AS `Зарплата`, `otdel` 
+FROM `shtat`
+#WHERE `zp` BETWEEN 20000 AND 25000;
+WHERE `zp` >= 20000 AND `zp` <= 25000;
+
+SELECT `id`, CONCAT(`lastname`, ' ', `name`) AS `ФИО`, `zp` AS `Зарплата`, `otdel` 
+FROM `shtat`
+WHERE `otdel` IS NULL;
+
+SELECT `id`, CONCAT(`lastname`, ' ', `name`) AS `ФИО`, `zp` AS `Зарплата`, `otdel` 
+FROM `shtat`
+WHERE `otdel` IN (SELECT `id` FROM `depart`);
+
+SELECT SUM(`zp`) FROM `shtat`;
+
+SELECT SUM(`zp`), `otdel` FROM `shtat` GROUP BY `otdel`;
+
+SELECT SUM(`zp`) AS `ФОТ`, `otdel` 
+FROM `shtat` 
+GROUP BY `otdel`
+HAVING `ФОТ` >= 50000;
+
+SELECT SUM(`zp`) AS `ФОТ`, `otdel` 
+FROM `shtat` 
+WHERE `otdel` != 999
+GROUP BY `otdel`
+HAVING `ФОТ` >= 50000;
+
+SELECT `name`, `zp` FROM `shtat` ORDER BY `zp` DESC LIMIT 1;
+#SELECT `name`, `zp` FROM `shtat` WHERE `zp` = (SELECT MAX(`zp`) FROM `shtat`);
+
+
+
+SELECT SUM(`zp`) AS `ФОТ`, `depart`.`name` FROM `shtat` 
+INNER JOIN `depart`
+ON `depart`.`id` = `shtat`.`otdel`
+GROUP BY `depart`.`name`;
+
+SELECT SUM(`zp`) AS `ФОТ`, `depart`.`name` FROM `shtat` 
+LEFT JOIN `depart`
+ON `depart`.`id` = `shtat`.`otdel`
+GROUP BY `depart`.`name`;
+
+SELECT SUM(`zp`) AS `ФОТ`, `depart`.`name` FROM `shtat` 
+RIGHT JOIN `depart`
+ON `depart`.`id` = `shtat`.`otdel`
+GROUP BY `depart`.`name`;
+
+
+SELECT `name` FROM `shtat` 
+WHERE `name` REGEXP '^A';
+
+SELECT `name` FROM `shtat` 
+WHERE `name` LIKE BINARY 'А%';
+
+SELECT `name` FROM `shtat` 
+WHERE `name` LIKE 'А____';
+
+SELECT `name` FROM `shtat` 
+WHERE `name` LIKE '%е%';
+
+DELETE FROM `shtat` WHERE `otdel` = 999;
+
+UPDATE `depart` SET `id` = 6 WHERE `name` = 'Охрана' AND `id` IS NOT NULL;
+
+UPDATE `shtat` SET `zp` = `zp` + 5000 WHERE `otdel` = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
