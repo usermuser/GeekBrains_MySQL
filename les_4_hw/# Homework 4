@@ -3,3 +3,34 @@
 2. Создать функцию, которая найдет менеджера по имени и фамилии.
 3. Создать триггер, который при добавлении нового сотрудника будет выплачивать ему
 вступительный бонус, занося запись в таблицу salary.
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `new_function`(n CHAR(48)) RETURNS char(50) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+declare lst varchar(48);
+SELECT `name` from `sotrudniki`.`shtat` where `name` = n
+into lst;
+RETURN (lst);
+END
+
+
+
+
+USE `sotrudniki`;
+ALTER TABLE `dates`
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
+## Рабочий вариант
+select f2('Тарас') as 'Имя';
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `f2`(n CHAR(48)) RETURNS char(50) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+declare lst varchar(48);
+SELECT `lastname`
+ from `sotrudniki`.`shtat` where `name` = n
+into lst;
+RETURN (lst);
+END
+
