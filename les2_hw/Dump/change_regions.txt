@@ -26,6 +26,37 @@ REFERENCES `_countries`(`id`)        # на какой столбец ссыла
 ON UPDATE CASCADE                    
 ON DELETE RESTRICT;
 
+
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='1';
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='2';
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='3';
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='4';
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='5';
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='6';
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='7';
+UPDATE `GB_schema`.`_cities` SET `country_id`='1' WHERE `id`='8';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='9';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='10';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='11';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='12';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='13';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='14';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='15';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='19';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='20';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='21';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='22';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='23';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='24';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='25';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='26';
+UPDATE `GB_schema`.`_cities` SET `country_id`='3' WHERE `id`='27';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='16';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='17';
+UPDATE `GB_schema`.`_cities` SET `country_id`='2' WHERE `id`='18';
+
+
+
 #
 ALTER TABLE `GB_schema`.`City` 
 RENAME TO  `GB_schema`.`_cities` ;
