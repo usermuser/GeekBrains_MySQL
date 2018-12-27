@@ -1,4 +1,8 @@
 #Посчитать количество сотрудников во всех отделах.
-SELECT count(*) as 'Кол-во в отделе', otdel as 'Отдел'
-FROM sotrudniki.shtat
-group by otdel;
+SELECT COUNT(*) AS 'Кол-во в отделе',
+	   `depart`.`name` as 'Отдел'
+FROM `sotrudniki`.`shtat`
+
+LEFT JOIN `depart`
+ON 	`depart`.`id` = `shtat`.`otdel`
+GROUP BY `otdel`;
