@@ -1,0 +1,159 @@
+﻿# создаем таблицу с датами
+CREATE TABLE `dates` (
+`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+`p_date` DATE,
+`u_date` DATE,
+`sotr_id` INT
+);
+
+# вставляем даты 
+INSERT INTO `dates` 
+(`p_date`, `u_date`, `sotr_id`) VALUES 
+('2018-02-12', '2018-12-12', 5),
+('2018-01-10', '2018-12-12', 7),
+('2018-02-12', NULL, 8);
+
+# пример соединения для трех таблиц
+SELECT `shtat`.`name`, `shtat`.`lastname`, `depart`.`name` AS `отдел`, `dates`.`p_date` AS `дата приема` FROM `shtat`
+INNER JOIN `depart`
+ON `shtat`.`otdel` = `depart`.`id`
+INNER JOIN `dates`
+ON `shtat`.`id` = `dates`.`sotr_id`;
+
+
+# 1 выбираем среднюю зп по отделам
+SELECT AVG(`zp`), `depart`.`name` FROM `shtat`
+INNER JOIN `depart`
+ON `shtat`.`otdel` = `depart`.`id`
+GROUP BY `depart`.`name`;
+
+# 2 выбираем сотрудника с максимальной зп
+SELECT `zp`, `name` FROM `shtat` WHERE `zp` = (SELECT MAX(`zp`) FROM `shtat`);
+
+# 3 удаляем сотрудника с максимальной зп
+DELETE FROM `shtat` WHERE `zp` = (SELECT * FROM(SELECT MAX(`zp`) FROM `shtat` LIMIT 1) AS `table1`);
+# или вот так
+DELETE FROM `shtat` ORDER BY `zp` DESC LIMIT 1;
+# если не удаляется отключаем безопасный режим
+SET SQL_SAFE_UPDATES = 0;
+
+# 4 считаем общее кол-во сотрудников
+SELECT COUNT(`id`) FROM `shtat`;
+# или вот так
+SELECT COUNT(*) FROM `shtat`;
+# но не так
+SELECT MAX(`id`) FROM `shtat`;
+
+# 5 считаем кол-во сотрудников по отделам и сколько всего денег получает отдел
+SELECT SUM(`zp`), COUNT(*), `depart`.`name` FROM `shtat`
+INNER JOIN `depart`
+ON `shtat`.`otdel` = `depart`.`id`
+GROUP BY `depart`.`name`;
+
+
+
+# создаем простое представление
+CREATE VIEW `sotr` AS
+SELECT `id`, `name`, `lastname`, `otdel` FROM `shtat`;
+
+# работаем с представлением как с обычной табл
+SELECT `name`, `otdel` FROM `sotr`;
+
+# создаем еще одно представление
+CREATE VIEW `sht` AS
+SELECT `shtat`.`name`, `shtat`.`lastname`, `depart`.`name` AS `отдел`, `dates`.`p_date` AS `дата приема` 
+FROM `shtat`
+INNER JOIN `depart`
+ON `shtat`.`otdel` = `depart`.`id`
+INNER JOIN `dates`
+ON `shtat`.`id` = `dates`.`sotr_id`;
+
+# работаем с представлением как с обычной табл
+SELECT * FROM `sht`;
+
+# изменяем основную табл через представление
+UPDATE `sht` SET `lastname` = 'Полонн.' WHERE `дата приема` = '2018-02-12';
+
+
+
+# создаем процедуру в консоли
+
+mysql -u root -p
+Enter password:******
+
+mysql> SHOW SCHEMAS;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| phpmyadmin         |
+| social             |
+| sotrudniki         |
+| sys                |
++--------------------+
+7 rows in set (0,00 sec)
+
+mysql> USE sotrudniki
+
+mysql> delimiter //
+
+mysql> CREATE PROCEDURE `proc2012` (OUT par1 INT)
+    -> BEGIN
+    -> SELECT MAX(`zp`) INTO `par1` FROM `shtat` LIMIT 1;
+    -> END//
+Query OK, 0 rows affected (0,14 sec)
+
+mysql> delimiter ;
+
+# вызываем процедуру и записываем результат в переменную
+mysql> CALL `proc2012` (@x);
+Query OK, 1 row affected (0,00 sec)
+
+#смотрим содержимое переменной
+mysql> SELECT @x;
++-------+
+| @x    |
++-------+
+| 30000 |
++-------+
+1 row in set (0,00 sec)
+
+
+# создаем функцию
+
+mysql> CREATE FUNCTION `fun2012` (userid INT)
+    -> RETURNS INT DETERMINISTIC READS SQL DATA
+    -> RETURN (SELECT `otdel` FROM `shtat` WHERE `id` = userid);
+Query OK, 0 rows affected (0,12 sec)
+
+# обращаемся к процедуре с параметром 100
+mysql> SELECT `fun2012` (100);
++-----------------+
+| `fun2012` (100) |
++-----------------+
+|               1 |
++-----------------+
+1 row in set (0,01 sec)
+
+# обращаемся к процедуре с параметром 8
+mysql> SELECT `fun2012` (8);
++---------------+
+| `fun2012` (8) |
++---------------+
+|             2 |
++---------------+
+1 row in set (0,00 sec)
+
+
+
+# создаем триггер
+mysql> CREATE TRIGGER `trig2012`
+    -> AFTER INSERT ON `shtat`
+    -> FOR EACH ROW
+    -> INSERT INTO `dates` (`p_date`, `sotr_id`) VALUES (NOW(), NEW.id);
+Query OK, 0 rows affected (0,10 sec)
+
+# проверямем триггер
+INSERT INTO `sotrudniki`.`shtat` (`zp`, `name`, `lastname`, `otdel`) VALUES ('12000', 'Елена', 'Пряхина', '4');
