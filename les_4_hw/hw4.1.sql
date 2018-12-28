@@ -97,6 +97,13 @@ SELECT @b;
 # ============================================
 
 
+
 # 2. Создать функцию, которая найдет менеджера по имени и фамилии.
 
+DROP function if exists `get_manager_by_id`;
 
+CREATE FUNCTION `get_manager_by_id` (userid INT)
+RETURNS INT DETERMINISTIC READS SQL DATA
+RETURN (SELECT `id` FROM `shtat` WHERE `id` = userid);
+
+SELECT `get_manager_by_id` (1);
