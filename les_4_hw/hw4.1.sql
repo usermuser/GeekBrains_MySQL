@@ -100,10 +100,19 @@ SELECT @b;
 
 # 2. Создать функцию, которая найдет менеджера по имени и фамилии.
 
-DROP function if exists `get_manager_by_id`;
+#  функция выдает id сотрудника по имени
+use sotrudniki;
+DROP function if exists `get_manager_id_by_name`;
 
-CREATE FUNCTION `get_manager_by_id` (userid INT)
-RETURNS INT DETERMINISTIC READS SQL DATA
-RETURN (SELECT `id` FROM `shtat` WHERE `id` = userid);
+CREATE FUNCTION `get_manager_id_by_name` (username VARCHAR(50))
+RETURNS INT  DETERMINISTIC READS SQL DATA
+RETURN (SELECT `id` FROM `shtat` WHERE `name` = username);
 
-SELECT `get_manager_by_id` (1);
+# Проверим работу функции
+mysql> SELECT `get_manager_id_by_name` ('Anton') as `id`;
++------+
+| id   |
++------+
+|    1 |
++------+
+1 row in set (0,00 sec)
