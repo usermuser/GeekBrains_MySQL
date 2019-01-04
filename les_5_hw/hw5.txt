@@ -1,0 +1,46 @@
+# В домашнем задании №3 была задача:
+# База данных «Сотрудники»:
+# 1. Выбрать среднюю зарплату по отделам.
+
+SELECT AVG(`zp`) AS 'Средняя ЗП', `depart`.`name` AS 'Отдел' FROM `shtat` 
+LEFT JOIN `depart`
+ON `depart`.`id` = `shtat`.`otdel`
+GROUP BY `otdel`
+
+# Попробуем произвести анализ запроса
+
+mysql> mysql> EXPLAIN SELECT AVG(`zp`) AS 'Средняя ЗП', `depart`.`name` AS 'Отдел' FROM `shtat`   LEFT JOIN `depart` ON `depart`.`id` = `shtat`` GROUP BY `otdel`;
++----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
+| id | select_type | table  | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra                                              |
++----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
+|  1 | SIMPLE      | shtat  | NULL       | ALL  | otdel         | NULL | NULL    | NULL |    5 |   100.00 | Using temporary; Using filesort                    |
+|  1 | SIMPLE      | depart | NULL       | ALL  | PRIMARY       | NULL | NULL    | NULL |    2 |   100.00 | Using where; Using join buffer (Block Nested Loop) |
++----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
+2 rows in set, 1 warning (0,00 sec)
+
+
+
+
+# В столбце filtered получаем 100%, но при этом в столбце Extra видим Using temporary; Using filesort
+# В методичке к 5му уроку говорится что нужно избавляться от этих двух параметров
+# Сделаем индекс для otdel, так как в столбце possible_keys указан именно он.
+
+mysql> CREATE INDEX `i_otdel` ON `shtat`(`otdel`);
+Query OK, 0 rows affected (0,31 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> EXPLAIN SELECT AVG(`zp`) AS 'Средняя ЗП', `depart`.`name` AS 'Отдел' FROM `shtat`   LEFT JOIN `depart` ON `depart`.`id` = `shtat`.`otdel` GROUP BY `otdel`;
++----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
+| id | select_type | table  | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra                                              |
++----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
+|  1 | SIMPLE      | shtat  | NULL       | ALL  | i_otdel       | NULL | NULL    | NULL |    5 |   100.00 | Using temporary; Using filesort                    |
+|  1 | SIMPLE      | depart | NULL       | ALL  | PRIMARY       | NULL | NULL    | NULL |    2 |   100.00 | Using where; Using join buffer (Block Nested Loop) |
++----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
+2 rows in set, 1 warning (0,00 sec)
+
+
+
+# Как видим, столбец Extra остался неизменным, значит на столбец possible_keys не обращаем внимания, он нам не поможет
+# Напрашивается другой вывод, есть столбец key, скорее всего именно тут можно оптимизировать, но как это сделать?
+# Сначала нужно удалить старый индекс, нагуглил команду DROP index_name ON table_name
+DROP `i_otdel` ON `shtat`;

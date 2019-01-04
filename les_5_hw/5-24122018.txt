@@ -1,0 +1,114 @@
+﻿# смотрим скрипт создания таблицы
+SHOW CREATE TABLE `dates`;
+
+# создаем таблицу salary
+CREATE TABLE `salary` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` date,
+  `bonus` INT,
+  `sotr_id` int(11),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+# создаем триггер
+CREATE TRIGGER `2412bonus` 
+AFTER INSERT ON `shtat`
+FOR EACH ROW
+INSERT INTO `salary` (`date`, `bonus`, `sotr_id`) VALUES (NOW(), NEW.zp/2, NEW.id);
+
+# проверяем триггер
+INSERT INTO `shtat` 
+(`zp`,`name`,`lastname`,`otdel`) VALUES 
+(20000,'Антон','Вершинин',4),
+(22000,'Ирина','Кенина',1);
+
+SELECT * FROM `salary`;
++----+------------+-------+---------+
+| id | date       | bonus | sotr_id |
++----+------------+-------+---------+
+|  1 | 2018-12-24 | 10000 |     102 |
+|  2 | 2018-12-24 | 11000 |     103 |
++----+------------+-------+---------+
+3 rows in set (0,00 sec)
+
+---
+
+# удаляем ф-цию 2412manager (если есть)
+DROP FUNCTION IF EXISTS `2412manager`;
+
+# создаем ф-цию 2412manager
+CREATE FUNCTION `2412manager` (s_name VARCHAR(25), s_lastname VARCHAR(30))
+RETURNS INT
+READS SQL DATA
+RETURN(SELECT `id` FROM `shtat` WHERE `name` = s_name AND `lastname` = s_lastname LIMIT 1);
+
+# проверяем ф-цию 2412manager
+SELECT `2412manager` ('Ирина', 'Кенина')
+
+# выводим всю инфорацию о сотруднике
+SELECT * FROM `shtat` WHERE `id` = (SELECT `2412manager` ('Ирина', 'Кенина'));
+
+# то же самое без функции
+SELECT * FROM `shtat` WHERE `name` = 'Ирина' AND `lastname` = 'Кенина'
+
+---
+
+# удаляем процедуру 2412manager (если есть)
+DROP PROCEDURE IF EXISTS `2412manager`;
+
+# создаем процедуру 2412manager
+CREATE PROCEDURE `2412manager` (s_name VARCHAR(25), s_lastname VARCHAR(30))
+READS SQL DATA
+SELECT * FROM `shtat` WHERE `name` = s_name AND `lastname` = s_lastname LIMIT 1;
+
+# проверяем процедуру 2412manager
+CALL `2412manager`('Ирина','Кенина');
+
+---
+
+# выключаем автокоммиты
+SET AUTOCOMMIT = 0;
+
+# выставляем нужный уровень изоляций
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+# создаем транзакцию
+BEGIN;
+SELECT @x := (SELECT MAX(`zp`) FROM `shtat`);
+SELECT @y := (SELECT MIN(`zp`) FROM `shtat`);
+SELECT @z := (SELECT `id` FROM `shtat` WHERE `zp` = @y);
+INSERT INTO `salary` (`date`, `bonus`, `sotr_id`) VALUES (NOW(), @x-@y, @z);
+ROLLBACK;
+#COMMIT;
+
+---
+
+# анализируем таблицу
+EXPLAIN `shtat`;
+
+# анализируем простой запрос
+EXPLAIN SELECT `name` FROM `shtat` WHERE `id` = 102;
+
+
+# анализируем запрос на полнотекстовый поиск
+EXPLAIN SELECT `name` FROM `shtat` WHERE `lastname` LIKE 'Кенина';
++----+-------------+-------+------------+-------+---------------+--------+---------+------+------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key    | key_len | ref  | rows | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+--------+---------+------+------+----------+-----------------------+
+|  1 | SIMPLE      | shtat | NULL       | range | NULL          | NULL   | NULL    | NULL |    2 |   50.00  |                       |
++----+-------------+-------+------------+-------+---------------+--------+---------+------+------+----------+-----------------------+
+1 row in set, 0 warnins (0,00 sec)
+
+# получили низкий КПД (filtered), добавляем индекс
+CREATE INDEX `l_name` ON `shtat`(`lastname`);
+
+# снова анализируем тот же запрос
+EXPLAIN SELECT `name` FROM `shtat` WHERE `lastname` LIKE 'Кенина';
++----+-------------+-------+------------+-------+---------------+--------+---------+------+------+----------+-----------------------+
+| id | select_type | table | partitions | type  | possible_keys | key    | key_len | ref  | rows | filtered | Extra                 |
++----+-------------+-------+------------+-------+---------------+--------+---------+------+------+----------+-----------------------+
+|  1 | SIMPLE      | shtat | NULL       | range | l_name        | l_name | 122     | NULL |    1 |   100.00 | Using index condition |
++----+-------------+-------+------------+-------+---------------+--------+---------+------+------+----------+-----------------------+
+1 row in set, 1 warning (0,00 sec)
+
+# правильное использование индексов позволяет увеличить КПД запроса до 100% (выводим все 100% строк из просмотренных)
