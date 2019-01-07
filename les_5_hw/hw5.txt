@@ -9,7 +9,7 @@ GROUP BY `otdel`
 
 # Попробуем произвести анализ запроса
 
-mysql> mysql> EXPLAIN SELECT AVG(`zp`) AS 'Средняя ЗП', `depart`.`name` AS 'Отдел' FROM `shtat`   LEFT JOIN `depart` ON `depart`.`id` = `shtat`` GROUP BY `otdel`;
+mysql> EXPLAIN SELECT AVG(`zp`) AS 'Средняя ЗП', `depart`.`name` AS 'Отдел' FROM `shtat`   LEFT JOIN `depart` ON `depart`.`id` = `shtat`` GROUP BY `otdel`;
 +----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
 | id | select_type | table  | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra                                              |
 +----+-------------+--------+------------+------+---------------+------+---------+------+------+----------+----------------------------------------------------+
@@ -50,6 +50,44 @@ mysql> EXPLAIN SELECT AVG(`zp`) AS 'Средняя ЗП', `depart`.`name` AS 'О
 #====================================================================================
 
 
+# Создадим таблицу для нашей будущей транзакции
+
+CREATE TABLE IF NOT EXISTS `position` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,   
+	`position` VARCHAR(30),   
+PRIMARY KEY (`id`) ) 
+ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+INSERT INTO `position` (`position`) VALUES ('junior');
+INSERT INTO `position` (`position`) VALUES ('middle');
+INSERT INTO `position` (`position`) VALUES ('senior');
 
+CREATE TABLE `salary` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `position_id` int(11) DEFAULT NULL,
+  `bonus` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`position_id`) REFERENCES `position`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `sotrudniki`.`salary` (`position_id`, `bonus`) VALUES ('1', '11');
+INSERT INTO `sotrudniki`.`salary` (`position_id`, `bonus`) VALUES ('2', '23');
+INSERT INTO `sotrudniki`.`salary` (`position_id`, `bonus`) VALUES ('3', '45');
+
+
+ALTER TABLE `shtat`
+ADD COLUMN `pos_id` INT(11) AFTER `otdel`;
+
+ALTER TABLE table_name 
+DROP FOREIGN KEY constraint_name;
+
+ALTER TABLE `salary`
+DROP FOREIGN KEY `salary_ibfk_1`;
+
+ALTER TABLE `salary`
+DROP COLUMN `position_id`;
+
+ALTER TABLE `shtat` 
+ADD FOREIGN KEY ()
