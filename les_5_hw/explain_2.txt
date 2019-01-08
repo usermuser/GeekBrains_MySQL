@@ -28,6 +28,7 @@ ON `_regions`.`id` = `_cities`.`region_id`;
 
 mysql> create index `country_title` on `_countries`(`title`);
 # повторим explain видим что rows был 3 стал 1, хоть и не большая но оптимизация
+# а также в столбце type теперь вместо Null стоит eq_ref
 
 +----+-------------+------------+------------+--------+---------------+---------+---------+------------------------------+------+----------+-------+
 | id | select_type | table      | partitions | type   | possible_keys | key     | key_len | ref                          | rows | filtered | Extra |
