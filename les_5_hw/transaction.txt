@@ -1,0 +1,53 @@
+
+## дать бонус сотруднику который работает больше года еще не уволился (`u_date` IS NULL)
+# сейчас больше года у нас работает сотрудник с sotr_id = 5
+
+mysql> SELECT * FROM sotrudniki.dates;
++----+------------+------------+---------+
+| id | p_date     | u_date     | sotr_id |
++----+------------+------------+---------+
+|  1 | 2018-02-12 | 2018-12-12 |       1 |
+|  2 | 2018-01-10 | 2018-12-12 |       3 |
+|  3 | 2016-02-12 | NULL       |       5 | <<<<
+|  4 | 2018-12-30 | NULL       |       2 |
++----+------------+------------+---------+
+4 rows in set (0,00 sec)
+
+
+mysql> SELECT * FROM sotrudniki.salary;
+# Таблица salary пока пустая
+Empty set (0,00 sec)
+
+# Выплатим бонус тому кто проработал больше года (это Аркадий Паровозов)
+
+mysql> SELECT * FROM sotrudniki.shtat;
++----+------------------+----------------------+-------+--------+-------+
+| id | name             | lastname             | otdel | pos_id | zp    |
++----+------------------+----------------------+-------+--------+-------+
+|  1 | Тарас            | Голомозый            |     1 |      3 | 25700 |
+|  2 | Андрей           | Юрченко              |     1 |      2 | 20700 |
+|  3 | Антон            | Полонников           |     2 |      3 | 21000 |
+|  4 | Анатолий         | Башлыков             |     1 |      2 | 25700 |
+|  5 | Аркадий          | Паровозов            |     1 |      1 | 20000 |
++----+------------------+----------------------+-------+--------+-------+
+5 rows in set (0,00 sec)
+
+#
+USE `sotrudniki`;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN;
+SELECT @a := (select `sotr_id` from `sotrudniki`.`dates` where `p_date` < '2017-01-08');
+SELECT @b := (select max(`zp`) from `sotrudniki`.`shtat`);
+SELECT @c := (select `zp` from `sotrudniki`.`shtat` where `id` = @a);
+INSERT INTO `sotrudniki`.`salary` (`date`,`bonus`,`sotr_id`) VALUES (NOW(), @b-@c, @a); 
+COMMIT;
+
+mysql> SELECT * FROM sotrudniki.salary;
++----+------------+-------+---------+
+| id | date       | bonus | sotr_id |
++----+------------+-------+---------+
+|  8 | 2019-01-08 |  5700 |       5 |
++----+------------+-------+---------+
+1 row in set (0,00 sec)
+
+# как видим сотрудник с `sotr_id` = 5 получил бонус.
