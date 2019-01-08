@@ -1,0 +1,45 @@
+# База данных «Страны и города мира»:
+# 1. Сделать запрос, в котором мы выберем все данные о городе – регион, страна.
+explain
+SELECT `_cities`.`title` AS 'Город', 
+       `_countries`.`title` AS 'Страна',
+       `_regions`.`title` AS 'Область'
+FROM `_cities`
+
+LEFT JOIN `_countries`
+ON `_countries`.`id` = `_cities`.`country_id`
+
+LEFT JOIN `_regions`
+ON `_regions`.`id` = `_cities`.`region_id`;
+
+
++----+-------------+------------+------------+--------+---------------+---------+---------+-----------------------------+------+-
+| id | select_type | table      | partitions | type   | possible_keys | key     | key_len | ref                         | rows | filtered | Extra                                              |
++----+-------------+------------+------------+--------+---------------+---------+---------+-----------------------------+------+-
+|  1 | SIMPLE      | _cities    | NULL       | ALL    | NULL          | NULL    | NULL    | NULL                        |   27 |   100.00 | NULL                                               |
+|  1 | SIMPLE      | _countries | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL                        |    3 |   100.00 | Using where; Using join buffer (Block Nested Loop) |
+|  1 | SIMPLE      | _regions   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | GB_schema._cities.region_id |    1 |   100.00 | NULL                                               |
++----+-------------+------------+------------+--------+---------------+---------+---------+-----------------------------+------+-
+3 rows in set, 1 warning (0,00 sec)
+
+
+
+# Хотя в столбце filtered везде 100 %  можно немного оптимизировать, а именно добавить индекс по имени в столбце `_countries`
+
+mysql> create index `country_title` on `_countries`(`title`);
+# повторим explain видим что rows был 3 стал 1, хоть и не большая но оптимизация
+
++----+-------------+------------+------------+--------+---------------+---------+---------+------------------------------+------+----------+-------+
+| id | select_type | table      | partitions | type   | possible_keys | key     | key_len | ref                          | rows | filtered | Extra |
++----+-------------+------------+------------+--------+---------------+---------+---------+------------------------------+------+----------+-------+
+|  1 | SIMPLE      | _cities    | NULL       | ALL    | NULL          | NULL    | NULL    | NULL                         |   27 |   100.00 | NULL  |
+|  1 | SIMPLE      | _countries | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | GB_schema._cities.country_id |    1 |   100.00 | NULL  |
+|  1 | SIMPLE      | _regions   | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | GB_schema._cities.region_id  |    1 |   100.00 | NULL  |
++----+-------------+------------+------------+--------+---------------+---------+---------+------------------------------+------+----------+-------+
+3 rows in set, 1 warning (0,00 sec)
+
+# 
+
+
+
+
